@@ -1,59 +1,59 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
 )
 
-var level, lev, chislo int
-var str string
-
-func hello() {
-	fmt.Println("Выберите 1, 2 или 3")
-	fmt.Fscan(os.Stdin, &level)
-	randomizer()
-}
-
-func play() {
+func play(chislo int, str string) bool {
+	number := 0
 	for i := 10; i > 0; i-- {
 		fmt.Println(str)
-		fmt.Fscan(os.Stdin, &chislo)
-		if chislo < lev {
+		fmt.Fscan(os.Stdin, &number)
+		switch {
+		case number < chislo:
 			fmt.Println("Слишком мало, попробуйте еще раз. У вас осталось ", i-1, " попыток")
-		}
-		if chislo > lev {
+		case number > chislo:
 			fmt.Println("Слишком много, попробуйте еще раз. У вас осталось ", i-1, " попыток")
-		}
-		if chislo == lev {
+		case number == chislo:
 			fmt.Println("Вы выиграли!")
 			fmt.Println("Вы потратили ", 10-i, " попыток")
-			break
+			return true
 		}
 	}
 	fmt.Println("Вы проиграли, начните еще раз!")
+	return false
 }
-func randomizer() {
-	switch lev = level; lev {
+func randomizer(level int) (int, string, error) {
+	switch level {
 	case 1:
-		lev = rand.Intn(100)
-		//fmt.Println("Ваш уровень ", level, "Ваш рандом = ", lev)
-		str = "Введите число от 0 до 100"
+		return rand.Intn(100), "Введите число от 0 до 100", nil
 	case 2:
-		lev = rand.Intn(500)
-		//fmt.Println("Ваш уровень ", level, "Ваш рандом = ", lev)
-		str = "Введите число от 0 до 500"
+		return rand.Intn(500), "Введите число от 0 до 500", nil
 	case 3:
-		lev = rand.Intn(1000)
-		//fmt.Println("Ваш уровень ", level, "Ваш рандом = ", lev)
-		str = "Введите число от 0 до 1000"
+		return rand.Intn(1000), "Введите число от 0 до 1000", nil
 	default:
 		fmt.Println("Вы ошиблись цифрой")
-		hello()
+		return 0, "", errors.New("error happened")
 	}
 }
 
 func main() {
-	hello()
-	play()
+	var level, chislo int
+	var str string
+	var err error
+	for {
+		fmt.Println("Выберите 1, 2 или 3")
+		fmt.Fscan(os.Stdin, &level)
+		chislo, str, err = randomizer(level)
+		if err == nil {
+			break
+		}
+		fmt.Println(err)
+	}
+	if win := play(chislo, str); win {
+		main()
+	}
 }
